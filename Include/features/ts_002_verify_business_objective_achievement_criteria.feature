@@ -3,28 +3,28 @@
 
      Background:
        Given the business objectives service is running
-       And objective "BO-001" is defined with KPIs
+       And KPI measurement tools are configured
 
-     Scenario: Successfully retrieve business objective with metrics
+     Scenario: Successfully retrieve business objective with KPIs
        When I send a GET request to "/api/v1/business-objectives/BO-001"
        Then the response status should be 200
        And the response field "objective_id" should be "BO-001"
-       And the response should contain field "kpi_metrics"
-       And the response should contain field "roi_calculation"
+       And the response should contain "kpis" array
+       And the response should contain "roi_metrics" object
 
-     Scenario: Validate KPI measurement tracking
-       Given objective "BO-001" has defined KPI targets
+     Scenario: Validate KPI measurement endpoint
+       Given business objective "BO-001" has defined KPIs
        When I send a POST request to "/api/v1/business-objectives/BO-001/measure" with body:
          """
-         {"metric_name": "user_adoption_rate", "actual_value": 85.5}
+         {"metric_name": "user_adoption_rate", "value": 85.5}
          """
-       Then the response status should be 200
+       Then the response status should be 201
        And the response field "measurement_recorded" should be true
 
      Scenario: Reject measurement for undefined objective
        When I send a POST request to "/api/v1/business-objectives/BO-999/measure" with body:
          """
-         {"metric_name": "test_metric", "actual_value": 50}
+         {"metric_name": "test_metric", "value": 100}
          """
        Then the response status should be 404
        And the response field "error" should contain "objective_not_found"
@@ -40,4 +40,5 @@ IMPORTANT REMINDERS:
 - Every Given/When/Then step should be traceable to actual code
 - Use realistic test data that matches the codebase's data models
 - If the project uses specific testing frameworks or patterns, follow those conventions
-- These scenarios are meta-level (testing BRD structure and process workflows), so look for document management, requirements tracking, approval workflow, KPI measurement, and milestone management features in the codebase
+- These scenarios are meta-level (testing BRD structure, approval workflows, etc.) — look for document management, workflow, or project management features in the codebase
+- If this is a typical application codebase without BRD/requirements management features, most scenarios may need to be skipped
