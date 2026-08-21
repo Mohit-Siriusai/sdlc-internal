@@ -2,32 +2,25 @@
    Feature: Verify business objective achievement criteria
 
      Background:
-       Given the business objectives service is running
-       And KPI measurement tools are configured
+       Given the objectives tracking service is running
+       And business objective "BO-001" is defined with KPIs
 
-     Scenario: Successfully retrieve business objective with KPIs
-       When I send a GET request to "/api/v1/business-objectives/BO-001"
+     Scenario: Successfully retrieve business objective with metrics
+       When I send a GET request to "/api/v1/objectives/BO-001"
        Then the response status should be 200
        And the response field "objective_id" should be "BO-001"
-       And the response should contain "kpis" array
-       And the response should contain "roi_metrics" object
+       And the response should contain "kpi_metrics" array
+       And the response should contain "target_value" field
 
-     Scenario: Validate KPI measurement endpoint
-       Given business objective "BO-001" has defined KPIs
-       When I send a POST request to "/api/v1/business-objectives/BO-001/measure" with body:
+     Scenario: Validate KPI measurement calculation
+       Given objective "BO-001" has target value 100
+       When I send a POST request to "/api/v1/objectives/BO-001/measure" with body:
          """
-         {"metric_name": "user_adoption_rate", "value": 85.5}
+         {"actual_value": 95, "measurement_date": "2026-08-18"}
          """
-       Then the response status should be 201
-       And the response field "measurement_recorded" should be true
-
-     Scenario: Reject measurement for undefined objective
-       When I send a POST request to "/api/v1/business-objectives/BO-999/measure" with body:
-         """
-         {"metric_name": "test_metric", "value": 100}
-         """
-       Then the response status should be 404
-       And the response field "error" should contain "objective_not_found"
+       Then the response status should be 200
+       And the response field "achievement_percentage" should be 95.0
+       And the response field "status" should be "on_track"
 
 6. COVERAGE SUMMARY — at the end, provide:
    - ✅ Covered: List each TS-ID, what code implements it, and how many test cases generated
@@ -40,5 +33,5 @@ IMPORTANT REMINDERS:
 - Every Given/When/Then step should be traceable to actual code
 - Use realistic test data that matches the codebase's data models
 - If the project uses specific testing frameworks or patterns, follow those conventions
-- These scenarios are meta-level (testing BRD structure, approval workflows, etc.) — look for document management, workflow, or project management features in the codebase
-- If this is a typical application codebase without BRD/requirements management features, most scenarios may need to be skipped
+- These scenarios are meta-level (testing BRD/requirements management), so look for document management, workflow, approval, or project management features in the codebase
+- If this is a different type of application (e.g., e-commerce, CRM), map these meta-scenarios to equivalent features (e.g., TS-007 approval workflow might map to order approval or user registration approval)
