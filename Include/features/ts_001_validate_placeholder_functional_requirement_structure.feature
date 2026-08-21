@@ -2,8 +2,8 @@
    Feature: Validate placeholder functional requirement structure
 
      Background:
-       Given the BRD management system is running
-       And the requirements database is accessible
+       Given the BRD document service is running
+       And the functional requirements module is initialized
 
      Scenario: Successfully validate FR-001 placeholder structure
        When I send a GET request to "/api/v1/requirements/FR-001"
