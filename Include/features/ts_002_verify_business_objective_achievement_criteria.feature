@@ -1,43 +1,37 @@
-@TS-002 @regression
-   Feature: Verify business objective achievement criteria
+@TS-002 @regression @api @demo-mode
+Feature: TS-002 Project type dropdown populated from GET /api/project-types
 
-     Background:
-       Given the business objectives service is running
-       And KPI measurement tools are configured
+  Background:
+    Given the portal API is running at "http://localhost:8000"
 
-     Scenario: Successfully retrieve business objective with KPIs
-       When I send a GET request to "/api/v1/business-objectives/BO-001"
-       Then the response status should be 200
-       And the response field "objective_id" should be "BO-001"
-       And the response should contain "kpis" array
-       And the response should contain "roi_metrics" object
+  Scenario: GET /api/project-types returns 200 with a list of exactly 5 project types
+    When I send a GET request to "/api/project-types"
+    Then the response status should be 200
+    And the response Content-Type should contain "application/json"
+    And the response body should have a top-level key "project_types"
+    And the response JSON field "project_types" is an array with exactly 5 items
+    And the "project_types" array contains "Microservice"
+    And the "project_types" array contains "Batch Job"
+    And the "project_types" array contains "Frontend App"
+    And the "project_types" array contains "Library"
+    And the "project_types" array contains "Data Pipeline"
 
-     Scenario: Validate KPI measurement endpoint
-       Given business objective "BO-001" has defined KPIs
-       When I send a POST request to "/api/v1/business-objectives/BO-001/measure" with body:
-         """
-         {"metric_name": "user_adoption_rate", "value": 85.5}
-         """
-       Then the response status should be 201
-       And the response field "measurement_recorded" should be true
+  Scenario: UI project-type dropdown contains all five supported project types
+    Given I am on the wizard view
+    Then the element with data-testid "input-type" contains an option with text "Microservice"
+    And the element with data-testid "input-type" contains an option with text "Batch Job"
+    And the element with data-testid "input-type" contains an option with text "Frontend App"
+    And the element with data-testid "input-type" contains an option with text "Library"
+    And the element with data-testid "input-type" contains an option with text "Data Pipeline"
 
-     Scenario: Reject measurement for undefined objective
-       When I send a POST request to "/api/v1/business-objectives/BO-999/measure" with body:
-         """
-         {"metric_name": "test_metric", "value": 100}
-         """
-       Then the response status should be 404
-       And the response field "error" should contain "objective_not_found"
+  Scenario: GET /api/project-types does not include fabricated or out-of-scope types
+    When I send a GET request to "/api/project-types"
+    Then the response status should be 200
+    And the "project_types" array should NOT contain "API Gateway"
+    And the "project_types" array should NOT contain "Mobile App"
+    And the "project_types" array should NOT contain "Monolith"
 
-6. COVERAGE SUMMARY — at the end, provide:
-   - ✅ Covered: List each TS-ID, what code implements it, and how many test cases generated
-   - ❌ Skipped: List each TS-ID that was skipped and WHY (feature not found in code)
-   - 📊 Overall: X of Y scenarios covered
 
-IMPORTANT REMINDERS:
-- Do NOT hallucinate endpoints or functions that don't exist in the code
-- Do NOT generate test cases for features that aren't implemented
-- Every Given/When/Then step should be traceable to actual code
-- Use realistic test data that matches the codebase's data models
-- If the project uses specific testing frameworks or patterns, follow those conventions
-- These scenarios are meta-level (testing BRD structure and process), so look for document management, requirements tracking, approval workflow, KPI measurement, and milestone management features in the codebase
+# ─────────────────────────────────────────────────────────────────────────────
+# TS-003  Language dropdown remains disabled until project type is selected
+# ─────────────────────────────────────────────────────────────────────────────
