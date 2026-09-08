@@ -1,52 +1,56 @@
-@TS-001 @regression
-   Feature: Validate placeholder functional requirement structure
+@TS-001 @regression @api @demo-mode
+Feature: TS-001 Landing page renders wizard-based UI with three action cards
 
-     Background:
-       Given the BRD document service is running
-       And the requirements management system is accessible
+  Background:
+    Given the portal is running at "http://localhost:8000"
+    And all projects have been reset via "clear state"
 
-     Scenario: Successfully validate functional requirement section structure
-       When I send a GET request to "/api/v1/brd/sections/functional-requirements"
-       Then the response status should be 200
-       And the response field "section_id" should be "FR-001"
-       And the response field "structure.fields" should contain "requirement_id"
-       And the response field "structure.fields" should contain "description"
-       And the response field "status" should be "ready_for_population"
+  Scenario: GET / returns HTTP 200 with HTML content type
+    When I send a GET request to "/"
+    Then the response status should be 200
+    And the response Content-Type should contain "text/html"
 
-     Scenario: Verify multiple functional requirements can be added
-       Given the functional requirements section exists
-       When I send a POST request to "/api/v1/requirements" with body:
-         """
-         {
-           "requirement_id": "FR-002",
-           "description": "Test requirement",
-           "priority": "high"
-         }
-         """
-       Then the response status should be 201
-       And the response field "requirement_id" should be "FR-002"
+  Scenario: GET / response body contains the three action-card labels
+    When I send a GET request to "/"
+    Then the response status should be 200
+    And the response body should contain "Create Project"
+    And the response body should contain "Add Member"
+    And the response body should contain "Remove Member"
 
-     Scenario: Handle missing requirement ID causing traceability issues
-       When I send a POST request to "/api/v1/requirements" with body:
-         """
-         {
-           "description": "Test requirement without ID"
-         }
-         """
-       Then the response status should be 400
-       And the response field "error" should contain "requirement_id_missing"
-       And the response field "message" should contain "traceability"
+  Scenario: Landing page contains all three action cards with correct data-testid attributes (AC-08)
+    Given I am on the landing page
+    Then the page contains a button with data-testid "card-create"
+    And the page contains a button with data-testid "card-add"
+    And the page contains a button with data-testid "card-remove"
 
-6. COVERAGE SUMMARY — at the end, provide:
-   - ✅ Covered: List each TS-ID, what code implements it, and how many test cases generated
-   - ❌ Skipped: List each TS-ID that was skipped and WHY (feature not found in code)
-   - 📊 Overall: X of Y scenarios covered
+  Scenario: Landing page project list renders empty state when no projects exist (AC-09)
+    Given I am on the landing page
+    Then the element with data-testid "project-list" should be visible
+    And the element with data-testid "project-list-empty" should be visible
+    And the element with data-testid "project-list-empty" should contain the text "No projects yet"
 
-IMPORTANT REMINDERS:
-- Do NOT hallucinate endpoints or functions that don't exist in the code
-- Do NOT generate test cases for features that aren't implemented
-- Every Given/When/Then step should be traceable to actual code
-- Use realistic test data that matches the codebase's data models
-- If the project uses specific testing frameworks or patterns, follow those conventions
-- These scenarios are meta-level (testing BRD structure, requirements management, approval workflows) — look for document management, workflow, or project management features in the codebase
-- If this is a different type of application (e.g., e-commerce, chat, etc.), these scenarios may not apply — in that case, mark them as skipped with reason "BRD management features not implemented in this application"
+  Scenario: Clicking the Create Project card opens the wizard view
+    Given I am on the landing page
+    When I click the element with data-testid "card-create"
+    Then the element with data-testid "input-type" should be visible
+    And the element with data-testid "input-language" should be visible
+    And the element with data-testid "input-name" should be visible
+    And the element with data-testid "btn-submit" should be visible
+
+  Scenario: Clicking the Add Member card opens the members view
+    Given I am on the landing page
+    When I click the element with data-testid "card-add"
+    Then the element with data-testid "select-project" should be visible
+    And the element with data-testid "input-member-email" should be visible
+    And the element with data-testid "input-member-role" should be visible
+
+  Scenario: Clicking the Remove Member card opens the members view with no add-member form
+    Given I am on the landing page
+    When I click the element with data-testid "card-remove"
+    Then the element with data-testid "select-project" should be visible
+    And the element with data-testid "member-list" should be visible
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TS-002  Project type dropdown populated from GET /api/project-types
+# ─────────────────────────────────────────────────────────────────────────────
