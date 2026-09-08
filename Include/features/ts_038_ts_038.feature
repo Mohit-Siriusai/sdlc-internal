@@ -114,6 +114,6 @@ Feature: TS-038 Demo mode - access grants stored as in-memory user_email/role tu
 # FR-L12  Remove member happy path
 #
 # ⚠  PLANTED BUG #3 — remove_member() in app.py is a no-op.
-#    DELETE returns HTTP 200 but does NOT mutate the members array.
-#    Scenarios verifying the member is absent after DELETE WILL FAIL.
+#     DELETE returns HTTP 200 but does NOT mutate the members array.
+#     Scenarios verifying the member is absent after DELETE WILL FAIL.
 # ─────────────────────────────────────────────────────────────────────────────
