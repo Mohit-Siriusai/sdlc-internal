@@ -5,7 +5,7 @@ Feature: FR-L12 Remove member from project
     Given the portal API is running at "http://localhost:8000"
     And all projects have been reset via "clear state"
 
-  Scenario: DELETE returns 200 and removed member no longer appears in GET /api/projects/{id} (AC-07)
+  Scenario: DELETE returns 200 and removed member no longer appears in GET /api/projects/{id}
     When I send a POST request to "/api/projects" with body:
       """
       {
@@ -66,7 +66,7 @@ Feature: FR-L12 Remove member from project
     And the "members" array contains an object where "user_email" equals "bob@y.com"
 
   Scenario: DELETE /api/projects/{id}/members/{email} on a non-existent project returns 404
-    When I send a DELETE request to "/api/projects/00000000-0000-4000-8000-000000000000/members/alice@x.com"
+    When I send a DELETE request to "/api/projects/00000000-0000-4000-8000-000000000000/members/nobody@x.com"
     Then the response status should be 404
     And the response JSON field "detail" should equal "Project not found"
 
@@ -102,7 +102,7 @@ Feature: FR-L12 Remove member from project
 # FR-L13  Remove non-existent member returns 404
 #
 # ⚠  PLANTED BUG #3 — remove_member() returns 200 for any email because the
-#    member-not-found guard is absent.  This scenario WILL FAIL.
+#     member-not-found guard is absent.  This scenario WILL FAIL.
 # ─────────────────────────────────────────────────────────────────────────────
 
 @regression @api @demo-mode @bug-3
